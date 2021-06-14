@@ -1,0 +1,19 @@
+#building app
+FROM node:12.16.1  as builder
+WORKDIR /usr/app
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+
+#setting up
+FROM node:12.16.1 
+RUN apt-get update && apt-get install -y bash vim telnet
+WORKDIR /usr/app
+COPY package*.json ./
+RUN npm install --production
+RUN npm audit fix
+
+COPY --from=builder /usr/app ./dist
+
+CMD node run start
